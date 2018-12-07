@@ -25,43 +25,51 @@ random.shuffle(tour) # take a random starting point
 opt = [1,22,8,26,31,28,3,36,35,20,2,29,21,16,50,34,30,9,49,10,39,33,45,15,44,42,
     40,19,41,13,25,14,24,43,7,23,48,6,27,51,46,12,47,18,4,17,37,5,38,11,32]
 opt = [opt[i]-1 for i in range(len(opt))]
-print(getTourScore(opt))
-print(opt)
+# print(getTourScore(opt))
+# print(opt)
+
 # parameters
-temperature = 1000
-stopTemperature = 0.00000001
-stopIteration = 10000000
-alpha = 0.9995
+temperature = 100000
+# stopTemperature = 0.00000001
+stopIteration = 200000
+alpha = 0.999
+delta = 0.1
 
 curScore = getTourScore(tour)
 curTour = tour
+scores = [curScore]
 bestScore = curScore
 bestTour = curTour
 accepted = 0
 iteration = 0
-while iteration < stopIteration and temperature > stopTemperature:
+notImproved = 0
+while iteration < stopIteration:
     # print(iteration, temperature)
     newTour = proposeNewTour(curTour)
     newScore = getTourScore(newTour)
     if(newScore < curScore): #Accept new tour
-        curTour = newTour
-        curScore = newScore
+        notImproved = 0
+        curTour, curScore = newTour, newScore
         accepted += 1
         if(curScore < bestScore):
-            bestScore = curScore
-            bestTour = curTour
+            bestScore, bestTour = curScore, curTour
     else:
-        uni = random.uniform(0,1)
-        bolz = math.exp(-abs(newScore - curScore)/temperature)
-        if(bolz < uni):
-            curTour = newTour
-            curScore = newScore
+        if(random.random() < math.exp(-abs(newScore - curScore)/temperature)):
+            curTour, curScore = newTour, newScore
             accepted += 1
+        else:
+            notImproved += 1
 
-    temperature = alpha*temperature
+    if(iteration % 100 == 0):
+        print(curScore, temperature)
+    if(notImproved < 50):
+        temperature *= alpha
+    else:
+        temperature *= 1./alpha
+    # temperature = temperature*(1+math.log(1+delta)*temperature/3*np.std(scores))**-1
     iteration += 1
 
-print(temperature, iteration)
+# print(temperature, iteration)
 print(accepted/iteration)
 print(bestTour)
 print(bestScore)
