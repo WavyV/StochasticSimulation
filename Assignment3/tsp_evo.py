@@ -35,7 +35,6 @@ def rankPopulation(population):
     return ranked_population
 
 
-
 def greedyTour(size):
     tour = [random.randint(1, size)]
     for _ in range(size-1):
@@ -50,14 +49,15 @@ def greedyTour(size):
     return tour
 
 
-distM = np.load('distM/distMeil51.npy')
+#distM = np.load('distM/distMeil51.npy')
+distM = np.load('distM/distMa280.npy')
+#distM = np.load('distM/distMpcb442.npy')
 
-# random.seed(123)
-# np.random.seed(123)
+
 N = 100  #Number of individuals
-D = 51  #Number of cities
+D = 280  #Number of cities (51, 280 or 442)
 maxiter = 1000
-INIT = 0 # select 1 for greedy, select 0 for totally random
+INIT = 1 # select 1 for greedy, select 0 for totally random
 best = np.zeros((maxiter))
 
 # Initialisation of population and initial fitness calculation
@@ -72,7 +72,7 @@ for n in range(N):
         tour = population[n, 0:D]
         population[n, D] = getTourScore(tour.astype('int'))
     elif INIT == 1:
-        population[n, 0:D] = greedyTour(51)
+        population[n, 0:D] = greedyTour(D)
         tour = population[n, 0:D]
         population[n, D] = getTourScore(tour.astype('int'))
 
@@ -85,9 +85,9 @@ while iter < maxiter:
     children = np.zeros((N, D+1))
     for n in range(N):
         tour = population[n, 0:D]
-        newTour = proposeNewTour(tour.astype('int'))
-        children[n, 0:D] = newTour
-        children[n, D] = getTourScore(newTour.astype('int'))
+        tour = proposeNewTour(tour.astype('int'))
+        children[n, 0:D] = tour
+        children[n, D] = getTourScore(tour.astype('int'))
 
     # Merge the parent and children populations
     merged_population = np.zeros((2*N, D+1))
