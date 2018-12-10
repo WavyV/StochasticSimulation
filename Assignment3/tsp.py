@@ -10,13 +10,14 @@ def getTourScore(tour):
     total += distM[tour[-1]][tour[0]]
     return total
 
-# Propose a new tour by randomly selecting 2 cities and reversing the values between
-def proposeNewTour(tour):
-    rand1 = random.randint(0, len(tour)-1)
-    rand2 = random.randint(rand1+1, len(tour)) # rand1 < rand2
-    tour[rand1:rand2] = reversed(tour[rand1:rand2])
 
-    return tour
+def proposeNewTour(route):
+    c1 = np.random.choice(range(0, len(route)-2))
+    c2 = np.random.choice(range(c1+2, len(route)))
+    new_route = np.append(route[0:c1], np.flip(route[c1:c2+1],0))
+    new_route = np.append(new_route, route[c2+1:])
+    return new_route
+
 
 def greedyTour(size):
     tour = [random.randint(0, size-1)]
@@ -35,17 +36,17 @@ distM = np.load('distM/distMeil51.npy')
 # tour = [i for i in range(51)]
 # random.shuffle(tour) # take a random starting point
 tour = greedyTour(51)
-print(tour)
-opt = [1,22,8,26,31,28,3,36,35,20,2,29,21,16,50,34,30,9,49,10,39,33,45,15,44,42,
-    40,19,41,13,25,14,24,43,7,23,48,6,27,51,46,12,47,18,4,17,37,5,38,11,32]
-opt = [opt[i]-1 for i in range(len(opt))]
+#print(tour)
+# opt = [1,22,8,26,31,28,3,36,35,20,2,29,21,16,50,34,30,9,49,10,39,33,45,15,44,42,
+#     40,19,41,13,25,14,24,43,7,23,48,6,27,51,46,12,47,18,4,17,37,5,38,11,32]
+# opt = [opt[i]-1 for i in range(len(opt))]
 # print(getTourScore(opt))
 # print(opt)
 
 # parameters
-temperature = 200
+temperature = 1000
 # stopTemperature = 0.00000001
-stopIteration = 1000
+stopIteration = 100000
 alpha = 0.98
 delta = 0.1
 
