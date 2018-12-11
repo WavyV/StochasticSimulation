@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import random
+from tqdm import tqdm
 
 
 def getTourScore(tour):
@@ -26,17 +27,31 @@ def calculateXi(neighbours, random_starts, Tn):
     for i in range(len(neighbours)):
         y += np.exp(-neighbours[i]/Tn)
         x += np.exp(-random_starts[i]/Tn)
+    print(np.log(x/y))
     return(np.log(x/y))
 
+def calculateXi2(neighbours, random_starts, Tn):
+    # Another version of this function more suitable for dealing with floating point errors
+    x, y = 0, 0
+    a = np.max(neighbours) / Tn
+    b = np.max(random_starts) / Tn
+    for i in range(len(neighbours)):
+        x += np.exp(-neighbours[i]/Tn - a)
+        y += np.exp(-random_starts[i]/Tn - b)
+    x = a + np.log(x)
+    y = b + np.log(y)
+    return(y - x)
 
-distM = np.load('distM/distMeil51.npy')
+
+#distM = np.load('distM/distMeil51.npy')
+distM = np.load('distM/distMa280.npy')
 
 #Find some positive initial transitions
-N = 10000
-D = 51
+N = 1000000
+D = 280
 random_starts = np.zeros((N))
 neighbours = np.zeros((N))
-for i in range(N):
+for i in tqdm(range(N)):
     accepted = False
     while accepted == False:
         tour = np.arange(D)
@@ -49,14 +64,15 @@ for i in range(N):
             neighbours[i] = x2
             accepted = True
 
+
 #Converge to the optimal starting temperature
-Tn = 5
-eps = 0.001
+Tn = 300
+eps = 0.00001
 delta = 1
 p = 2
 while delta > eps:
     t_prev = Tn
-    xiTn = calculateXi(neighbours, random_starts, Tn)
+    xiTn = calculateXi2(neighbours, random_starts, Tn)
     Tn = Tn * (xiTn/np.log(0.8))**(1/p)
     delta = np.abs(np.exp(xiTn) - 0.8)
     print(Tn)
