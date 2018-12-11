@@ -10,12 +10,14 @@ def getTourScore(tour):
     total += distM[tour[-1]][tour[0]]
     return total
 
-# Propose a new tour by randomly selecting 2 cities and reversing the values between
-def proposeNewTour(tour):
-    rand1 = random.randint(0, len(tour)-1)
-    rand2 = random.randint(rand1+1, len(tour)) # rand1 < rand2
-    tour[rand1:rand2] = reversed(tour[rand1:rand2])
-    return tour
+
+def proposeNewTour(route):
+    c1 = np.random.choice(range(0, len(route)-2))
+    c2 = np.random.choice(range(c1+2, len(route)))
+    new_route = np.append(route[0:c1], np.flip(route[c1:c2+1],0))
+    new_route = np.append(new_route, route[c2+1:])
+    return new_route
+
 
 def greedyTour(size):
     tour = [random.randint(0, size-1)]
@@ -30,45 +32,22 @@ def greedyTour(size):
 
     return tour
 
-def markovChain(tour, markovChainLength, temperature):
-    curTour = tour
-    curScore = getTourScore(curTour)
-    bestTour, bestScore = curTour, curScore
-    accepted = 0
-    for _ in range(markovChainLength):
-        newTour = proposeNewTour(curTour)
-        newScore = getTourScore(newTour)
-        A = min(1, math.exp(-(newScore - curScore)/temperature))
-        if(A == 1): #Accept new tour
-            curTour, curScore = newTour, newScore
-            accepted += 1
-            if(curScore < bestScore):
-                bestScore, bestTour = curScore, curTour
-        else:
-            if(A < random.random()):
-                curTour, curScore = newTour, newScore
-                accepted += 1
-
-    return curTour, curScore, accepted/markovChainLength
-
 distM = np.load('distM/distMeil51.npy')
 # tour = [i for i in range(51)]
 # random.shuffle(tour) # take a random starting point
 tour = greedyTour(51)
-opt = [1,22,8,26,31,28,3,36,35,20,2,29,21,16,50,34,30,9,49,10,39,33,45,15,44,42,
-    40,19,41,13,25,14,24,43,7,23,48,6,27,51,46,12,47,18,4,17,37,5,38,11,32]
-opt = [opt[i]-1 for i in range(len(opt))]
-# print(opt, len(opt))
-# print(tour, len(tour))
-
+#print(tour)
+# opt = [1,22,8,26,31,28,3,36,35,20,2,29,21,16,50,34,30,9,49,10,39,33,45,15,44,42,
+#     40,19,41,13,25,14,24,43,7,23,48,6,27,51,46,12,47,18,4,17,37,5,38,11,32]
+# opt = [opt[i]-1 for i in range(len(opt))]
 # print(getTourScore(opt))
 # print(opt)
 
 # parameters
-temperature = 100
-stopTemperature = 0.01
-stopIteration = 10000
-alpha = 0.995
+temperature = 1000
+# stopTemperature = 0.00000001
+stopIteration = 100000
+alpha = 0.98
 delta = 0.1
 
 curScore = getTourScore(tour)
@@ -76,18 +55,38 @@ curTour = tour
 scores = [curScore]
 bestScore = curScore
 bestTour = curTour
+accepted = 0
 iteration = 0
-while iteration < stopIteration and temperature > stopTemperature:
-    curTour, curScore, p = markovChain(curTour, 200, temperature)
-    if(curScore < bestScore):
-        bestTour, bestScore = curTour, curScore
-    temperature *= alpha
+notImproved = 0
+while iteration < stopIteration:
+    # print(iteration, temperature)
+    newTour = proposeNewTour(curTour)
+    newScore = getTourScore(newTour)
+    if(newScore < curScore): #Accept new tour
+        notImproved = 0
+        curTour, curScore = newTour, newScore
+        accepted += 1
+        if(curScore < bestScore):
+            bestScore, bestTour = curScore, curTour
+    else:
+        if(random.random() < math.exp(-abs(newScore - curScore)/temperature)):
+            curTour, curScore = newTour, newScore
+            accepted += 1
+        else:
+            notImproved += 1
 
     if(iteration % 100 == 0):
         print(curScore, temperature)
+
+    temperature = temperature*alpha
+    # if(notImproved < 50):
+    #     temperature *= alpha
+    # else:
+    #     temperature *= 1./alpha
+    # temperature = temperature*(1+math.log(1+delta)*temperature/3*np.std(scores))**-1
     iteration += 1
 
 # print(temperature, iteration)
-# print(accepted/iteration)
+print(accepted/iteration)
 print(bestTour)
 print(bestScore)
