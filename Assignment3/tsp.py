@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import random
+import matplotlib.pyplot as plt
 
 # Get the current tour score by summing the distance matrix values for the current tour
 def getTourScore(tour):
@@ -44,10 +45,11 @@ tour = greedyTour(51)
 # print(opt)
 
 # parameters
-temperature = 1000
-# stopTemperature = 0.00000001
-stopIteration = 100000
-alpha = 0.98
+T0 = 90
+temperature = T0
+stopTemperature = 0.05
+stopIteration = 25000
+alpha = 0.9997
 delta = 0.1
 
 curScore = getTourScore(tour)
@@ -58,6 +60,7 @@ bestTour = curTour
 accepted = 0
 iteration = 0
 notImproved = 0
+iter, temperatures = [], []
 while iteration < stopIteration:
     # print(iteration, temperature)
     newTour = proposeNewTour(curTour)
@@ -75,10 +78,17 @@ while iteration < stopIteration:
         else:
             notImproved += 1
 
-    if(iteration % 100 == 0):
-        print(curScore, temperature)
+    # if(iteration % 100 == 0):
+    #     print(curScore, temperature)
 
-    temperature = temperature*alpha
+    # temperature = temperature*alpha
+    print(temperature, iteration)
+    # temperature = (T0 - stopTemperature)/(1+math.exp(0.3*(iteration-stopIteration/2))) + stopTemperature
+    # temperature = stopTemperature + (T0 - stopTemperature)*(1./(1.+math.exp(((2.0*math.log(T0-stopTemperature))/stopIteration)*(iteration-0.5*stopIteration))))
+    # temperature = T0 - iteration**(math.log(T0-stopTemperature)/math.log(stopIteration))
+    temperature = T0/(1+178*math.log(1+iteration))
+    temperatures.append(temperature)
+    iter.append(iteration)
     # if(notImproved < 50):
     #     temperature *= alpha
     # else:
@@ -90,3 +100,9 @@ while iteration < stopIteration:
 print(accepted/iteration)
 print(bestTour)
 print(bestScore)
+print(temperature)
+
+plt.figure()
+plt.plot(iter, temperatures)
+# plt.yscale('log')
+plt.show()
