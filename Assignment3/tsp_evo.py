@@ -4,6 +4,7 @@ import numpy as np
 import math
 import random
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 # Get the current tour score by summing the distance matrix values for the current tour
 def getTourScore(tour):
@@ -56,8 +57,8 @@ distM = np.load('distM/distMa280.npy')
 
 N = 100  #Number of individuals
 D = 280  #Number of cities (51, 280 or 442)
-maxiter = 1000
-INIT = 1 # select 1 for greedy, select 0 for totally random
+maxiter = 7500
+INIT = 0 # select 1 for greedy, select 0 for totally random
 best = np.zeros((maxiter))
 
 # Initialisation of population and initial fitness calculation
@@ -79,7 +80,7 @@ for n in range(N):
 population = rankPopulation(population)
 
 iter = 0
-while iter < maxiter:
+for iter in tqdm(range(maxiter)):
 
     # Each individual creates 1 offspring by having part of the sequence inverted
     children = np.zeros((N, D+1))
@@ -100,6 +101,7 @@ while iter < maxiter:
     iter += 1
     best[iter-1] = population[0, D]
 
+np.save('results/evol_res.npy', best)
 print(population[:5, :])
 plt.plot(np.arange(maxiter), best)
 plt.xlabel('Iteration')

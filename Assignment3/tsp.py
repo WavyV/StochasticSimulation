@@ -33,24 +33,19 @@ def greedyTour(size):
 
     return tour
 
-distM = np.load('distM/distMeil51.npy')
-# tour = [i for i in range(51)]
-# random.shuffle(tour) # take a random starting point
-tour = greedyTour(51)
-#print(tour)
+distM = np.load('distM/distMa280.npy')
+tour = [i for i in range(280)]
+random.shuffle(tour) # take a random starting point
+# tour = greedyTour(51)
 # opt = [1,22,8,26,31,28,3,36,35,20,2,29,21,16,50,34,30,9,49,10,39,33,45,15,44,42,
 #     40,19,41,13,25,14,24,43,7,23,48,6,27,51,46,12,47,18,4,17,37,5,38,11,32]
 # opt = [opt[i]-1 for i in range(len(opt))]
-# print(getTourScore(opt))
-# print(opt)
 
 # parameters
-T0 = 90
+T0 = 379
 temperature = T0
-stopTemperature = 0.05
-stopIteration = 25000
-alpha = 0.9997
-delta = 0.1
+TN = 0.05
+stopIteration = 750000
 
 curScore = getTourScore(tour)
 curTour = tour
@@ -60,49 +55,32 @@ bestTour = curTour
 accepted = 0
 iteration = 0
 notImproved = 0
-iter, temperatures = [], []
+iter, temperatures, scores = [], [], []
 while iteration < stopIteration:
     # print(iteration, temperature)
     newTour = proposeNewTour(curTour)
     newScore = getTourScore(newTour)
     if(newScore < curScore): #Accept new tour
-        notImproved = 0
         curTour, curScore = newTour, newScore
-        accepted += 1
-        if(curScore < bestScore):
-            bestScore, bestTour = curScore, curTour
     else:
         if(random.random() < math.exp(-abs(newScore - curScore)/temperature)):
             curTour, curScore = newTour, newScore
-            accepted += 1
-        else:
-            notImproved += 1
 
     # if(iteration % 100 == 0):
     #     print(curScore, temperature)
 
-    # temperature = temperature*alpha
-    print(temperature, iteration)
-    # temperature = (T0 - stopTemperature)/(1+math.exp(0.3*(iteration-stopIteration/2))) + stopTemperature
-    # temperature = stopTemperature + (T0 - stopTemperature)*(1./(1.+math.exp(((2.0*math.log(T0-stopTemperature))/stopIteration)*(iteration-0.5*stopIteration))))
-    # temperature = T0 - iteration**(math.log(T0-stopTemperature)/math.log(stopIteration))
-    temperature = T0/(1+178*math.log(1+iteration))
-    temperatures.append(temperature)
-    iter.append(iteration)
-    # if(notImproved < 50):
-    #     temperature *= alpha
-    # else:
-    #     temperature *= 1./alpha
-    # temperature = temperature*(1+math.log(1+delta)*temperature/3*np.std(scores))**-1
+    temperature = T0*(TN/T0)**(iteration/float(stopIteration))
+    scores.append(curScore)
     iteration += 1
 
+np.save('results/SA_res.npy', scores)
 # print(temperature, iteration)
-print(accepted/iteration)
-print(bestTour)
-print(bestScore)
-print(temperature)
+# print(accepted/iteration)
+# print(bestTour)
+# print(bestScore)
+# print(temperature)
 
-plt.figure()
-plt.plot(iter, temperatures)
+# plt.figure()
+# plt.plot(iter, temperatures)
 # plt.yscale('log')
-plt.show()
+# plt.show()
