@@ -75,7 +75,7 @@ def tsp(distanceMatrix, D, greedy, T0, coolingSchedule, maxiter):
 
 
 # Load the distance matrix of the appropriate problem
-problem = 1  #1: eil51, 2: a280, 3: pcb442
+problem = 2  #1: eil51, 2: a280, 3: pcb442
 if problem == 1:
     distM = np.load('distM/distMeil51.npy')
     D = 51
@@ -96,40 +96,42 @@ runs = 50
 alphas = [0.9990, 0.9991, 0.9992, 0.9993, 0.9994, 0.9995, 0.9996, 0.9997, 0.9998, 0.9999]
 maxiters = [500, 1000, 2500, 5000, 10000, 25000]
 
-i = 0
-means = np.zeros((len(alphas), len(maxiters)))
-stds = np.zeros((len(alphas), len(maxiters)))
-for alpha in tqdm(alphas):
-    j = 0
-    for maxiter in tqdm(maxiters):
-        results = []
-        for _ in range(runs):
-            results.append(tsp(distM, D, greedy, T0, alpha, maxiter))
-        means[i, j] = np.mean(results)
-        stds[i, j] = 1.96*np.std(results)/np.sqrt(runs)
-        j += 1
-    i += 1
+# i = 0
+# means = np.zeros((len(alphas), len(maxiters)))
+# stds = np.zeros((len(alphas), len(maxiters)))
+# for alpha in tqdm(alphas):
+#     j = 0
+#     for maxiter in tqdm(maxiters):
+#         results = []
+#         for _ in range(runs):
+#             results.append(tsp(distM, D, greedy, T0, alpha, maxiter))
+#         means[i, j] = np.mean(results)
+#         stds[i, j] = 1.96*np.std(results)/np.sqrt(runs)
+#         j += 1
+#     i += 1
+#
+# print(means)
+# print(stds)
+#
+# np.save('results/means_gridsearch.npy', means)
+# np.save('results/stds_gridsearch.npy', stds)
+#
+# normalized_means = means / np.max(means)
+# width = 4
+# height = 4
+# DPI = 300
+# img_width = DPI * width
+# img_height = DPI * height
+# fig, ax = plt.subplots(figsize=(width, height), dpi=DPI)
+# ticks = np.arange(0, img_width)
+# x_ticks = [0.5, 1, 2.5, 5, 10, 25]
+# plt.xticks(ticks, x_ticks)
+# y_ticks = alphas
+# plt.yticks(ticks, y_ticks)
+# plt.imshow(means, origin='lower', cmap='viridis_r')
+# plt.xlabel('Maximum Number of Iterations (x10^3)')
+# plt.ylabel('Alpha')
+# plt.colorbar()
+# plt.show()
 
-print(means)
-print(stds)
-
-np.save('results/means_gridsearch.npy', means)
-np.save('results/stds_gridsearch.npy', stds)
-
-normalized_means = means / np.max(means)
-width = 4
-height = 4
-DPI = 300
-img_width = DPI * width
-img_height = DPI * height
-fig, ax = plt.subplots(figsize=(width, height), dpi=DPI)
-ticks = np.arange(0, img_width)
-x_ticks = [0.5, 1, 2.5, 5, 10, 25]
-plt.xticks(ticks, x_ticks)
-y_ticks = alphas
-plt.yticks(ticks, y_ticks)
-plt.imshow(means, origin='lower', cmap='viridis_r')
-plt.xlabel('Maximum Number of Iterations (x10^3)')
-plt.ylabel('Alpha')
-plt.colorbar()
-plt.show()
+print(tsp(distM, D, 0, 90, 0.9997, 100000))

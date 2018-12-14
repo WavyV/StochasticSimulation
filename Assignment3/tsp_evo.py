@@ -58,7 +58,7 @@ distM = np.load('distM/distMa280.npy')
 N = 100  #Number of individuals
 D = 280  #Number of cities (51, 280 or 442)
 maxiter = 7500
-INIT = 0 # select 1 for greedy, select 0 for totally random
+INIT = 1 # select 1 for greedy, select 0 for totally random
 best = np.zeros((maxiter))
 
 # Initialisation of population and initial fitness calculation
